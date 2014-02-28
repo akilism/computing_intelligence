@@ -1,0 +1,11 @@
+{
+  "name": "computing-intelligence-exercises",
+  "version": "0.0.1",
+  "description": "Exercises from Computing Intelligencer",
+  "private": false,
+  "author": "Akil Harris",
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  }
+}
