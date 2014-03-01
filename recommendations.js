@@ -56,14 +56,12 @@ var critics = {
     'snakes': 4.5,
     'superman': 4.0,
     'dupree': 1.0
+  },
+  'akil' : {
+    'lady': 3.0,
+    'snakes': 4.0
   }
 };
-
-//console.log(critics);
-//console.log(critics.lisa.lady);
-//console.log(critics.mick.snakes);
-//console.log(critics.jack);
-
 
 var recommend = function () {
 
@@ -84,7 +82,7 @@ var recommend = function () {
 
   //sum all of an objects keys.
   var getSum = function(obj, key) {
-    var sum = 0,
+    var sum,
       arr = [];
 
     for (var k in obj[key]) {
@@ -154,7 +152,7 @@ var recommend = function () {
     return num/den;
   };
 
-
+  //get the top n matches
   var topMatches = function (preferences, person, n, similarity) {
     var scores = [];
 
@@ -174,16 +172,71 @@ var recommend = function () {
     return scores.slice(0, n);
   };
 
+  //get recommendations
+  var getRecommendations = function (preferences, person, similarity) {
+    var totals = {},
+        simSums = {},
+        rankings = [],
+        sim;
+
+    for(var other in preferences) {
+      //if this is the person we are recommending for return.
+      if(other === person) { continue; }
+      if(preferences.hasOwnProperty(other)) {
+        sim = similarity(preferences, person, other);
+
+        //no similarity then return.
+        if (sim === 0) { continue; }
+
+        for(var k in preferences[other]) {
+          if(preferences[other].hasOwnProperty(k)) {
+            //only look at things that don't exist in person.
+            if (Object.keys(preferences[person]).indexOf(k) === -1 || preferences[person][k] === 0) {
+              if(totals.hasOwnProperty(k)) {
+                totals[k] += preferences[other][k]*sim;
+              } else {
+                totals[k] = preferences[other][k]*sim;
+              }
+
+              if(simSums.hasOwnProperty(k)) {
+                simSums += sim;
+              } else {
+                simSums = sim;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    //calculate rankings.
+    for(var i in totals) {
+      if(totals.hasOwnProperty(i)) {
+        var ranked = {};
+        ranked[i] = totals[i];
+        rankings.push(ranked);
+      }
+    }
+
+    rankings.sort();
+    rankings.reverse();
+    return rankings;
+
+
+
+
+  };
+
   return {
     euclidean:euclidean,
     pearson:pearson,
-    topMatches:topMatches
+    topMatches:topMatches,
+    getRecommendations:getRecommendations
   };
 
 }();
 
-
-var rec = recommend;
-//console.log('euclidean    :   ' + rec.euclidean(critics, 'lisa', 'gene'));
-//console.log('pearson      :   ' + rec.pearson(critics, 'lisa', 'gene'));
-console.log('top matches  : \n', rec.topMatches(critics, 'claudia1', 5, rec.pearson));
+console.log('euclidean    :   ' + recommend.euclidean(critics, 'lisa', 'gene'));
+console.log('pearson      :   ' + recommend.pearson(critics, 'lisa', 'gene'));
+console.log('top matches  : \n', recommend.topMatches(critics, 'toby', 5, rec.euclidean));
+console.log('recommendations  : \n', recommend.getRecommendations(critics, 'akil', rec.pearson));
