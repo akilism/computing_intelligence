@@ -120,6 +120,7 @@ var recommend = function () {
     return sums;
   };
 
+  //transform the data.
   var transformPrefs = function (preferences) {
     var result = {};
 
@@ -248,12 +249,32 @@ var recommend = function () {
 
   };
 
+  //item based filtering.
+  var calculateSimilarItems = function (preferences, n) {
+    var result = {},
+      itemPrefs = transformPrefs(preferences),
+      c = 0,
+      scores;
+
+    for(var i in itemPrefs) {
+      if(itemPrefs.hasOwnProperty(i)) {
+        c++;
+        if (c % 100 === 0) { console.log(c + ' / ' + itemPrefs.length); }
+        scores = topMatches(itemPrefs, i, n, euclidean);
+        result[i] = scores;
+      }
+    }
+
+    return result;
+  };
+
   return {
     euclidean:euclidean,
     pearson:pearson,
     topMatches:topMatches,
     getRecommendations:getRecommendations,
-    transformPrefs:transformPrefs
+    transformPrefs:transformPrefs,
+    calculateSimilarItems:calculateSimilarItems
   };
 
 }();
@@ -270,3 +291,5 @@ console.log('euclidean    :   ' + recommend.euclidean(movies, 'superman', 'snake
 console.log('pearson      :   ' + recommend.pearson(movies, 'night', 'lady'));
 console.log('top matches  : \n', recommend.topMatches(movies, 'superman', 5, recommend.euclidean));
 console.log('recommendations  : \n', recommend.getRecommendations(movies, 'lady', recommend.pearson));
+
+console.log(recommend.calculateSimilarItems(critics, 10));
