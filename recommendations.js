@@ -67,6 +67,7 @@ var recommend = function () {
 
   //get the shared entries.
   var getSharedItems = function (obj, a, b) {
+    debugger;
     var sharedItems = [],
       keysP1 = Object.keys(obj[a]),
       keysP2 = Object.keys(obj[b]);
@@ -117,6 +118,26 @@ var recommend = function () {
     }
 
     return sums;
+  };
+
+  var transformPrefs = function (preferences) {
+    var result = {};
+
+    for (var p in preferences) {
+      if (preferences.hasOwnProperty(p)) {
+        for (var i in preferences[p]) {
+          if (preferences[p].hasOwnProperty(i)) {
+            if(result.hasOwnProperty(i)) {
+              result[i][p] = preferences[p][i];
+            } else {
+              result[i] = {};
+              result[i][p] =  preferences[p][i];
+            }
+          }
+        }
+      }
+    }
+    return result;
   };
 
   //calculate the euclidean distance.
@@ -231,12 +252,21 @@ var recommend = function () {
     euclidean:euclidean,
     pearson:pearson,
     topMatches:topMatches,
-    getRecommendations:getRecommendations
+    getRecommendations:getRecommendations,
+    transformPrefs:transformPrefs
   };
 
 }();
 
+console.log('critics      : ');
 console.log('euclidean    :   ' + recommend.euclidean(critics, 'lisa', 'gene'));
 console.log('pearson      :   ' + recommend.pearson(critics, 'lisa', 'gene'));
-console.log('top matches  : \n', recommend.topMatches(critics, 'toby', 5, rec.euclidean));
-console.log('recommendations  : \n', recommend.getRecommendations(critics, 'akil', rec.pearson));
+console.log('top matches  : \n', recommend.topMatches(critics, 'toby', 5, recommend.euclidean));
+console.log('recommendations  : \n', recommend.getRecommendations(critics, 'akil', recommend.pearson));
+
+var movies = recommend.transformPrefs(critics);
+console.log('movies       :');
+console.log('euclidean    :   ' + recommend.euclidean(movies, 'superman', 'snakes'));
+console.log('pearson      :   ' + recommend.pearson(movies, 'night', 'lady'));
+console.log('top matches  : \n', recommend.topMatches(movies, 'superman', 5, recommend.euclidean));
+console.log('recommendations  : \n', recommend.getRecommendations(movies, 'lady', recommend.pearson));
